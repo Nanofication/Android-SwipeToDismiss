@@ -74,7 +74,7 @@ import java.util.List;
  * original code : https://github.com/romannurik/android-swipetodismiss
  * <br>
  * I add some functions below.<br>
- * {@link #setSwipeDistanceRate(float)}, {@link #setSwipeMode(int)},
+ * {@link #setSwipeDistanceRatio(float)}, {@link #setSwipeMode(int)},
  * {@link #setEnableTouchListen(boolean)}, {@link #setDoDismiss(boolean)},
  * {@link com.hansune.touch.SwipeDismissListViewTouchListener.DismissCallbacks#onTryToDismiss(android.view.View, int)}
  * With these codes, I make a some different example.
@@ -122,8 +122,8 @@ public class SwipeDismissListViewTouchListener implements View.OnTouchListener {
     private boolean touchListen = true;
     private int swipeMode = SWIPE_MODE_BOTH;
     private boolean mDoDismiss = true;
-    private float swipeDistanceRate = 1;
-    private float dismissDecisionDistanceRate = 0.5f;
+    private float swipeDistanceRatio = 1;
+    private float dismissDecisionDistanceRatio = 0.5f;
 
     /**
      * Determine swiping direction.<br>
@@ -172,18 +172,18 @@ public class SwipeDismissListViewTouchListener implements View.OnTouchListener {
 
     /**
      * Set the movable distance in ratio to the length of the item view.
-     * If the distance is less than the value of {@link #getDismissDecisionDistanceRate()},
+     * If the distance is less than the value of {@link #getDismissDecisionDistanceRatio()},
      * dismissing event is not called.
      * <br>
      * <br>
      * 밀기 가능한 거리를 아이템 뷰 가로 길이의 비율로 지정한다.
-     * 만약 그 거리가 {@link #getDismissDecisionDistanceRate()}의 값보다 작을 경우,
+     * 만약 그 거리가 {@link #getDismissDecisionDistanceRatio()}의 값보다 작을 경우,
      * 사라지게 하는 이벤트는 작동하지 않는다.
      * @param ratio Proportion to the length of the item view. (0 ~ 1)<br>
      *              If this is 1, user can swipe the item view as far as the item view's width.
      */
-    public void setSwipeDistanceRate(float ratio) {
-        this.swipeDistanceRate = ratio;
+    public void setSwipeDistanceRatio(float ratio) {
+        this.swipeDistanceRatio = ratio;
     }
 
     /**
@@ -192,8 +192,8 @@ public class SwipeDismissListViewTouchListener implements View.OnTouchListener {
      *     움직일 수 있는 거리를 아이템뷰의 길이에 대한 비율로 얻는다.
      * @return Proportion to the length of the item view. (0 ~ 1)
      */
-    public float getSwipeDistanceRate() {
-        return swipeDistanceRate;
+    public float getSwipeDistanceRatio() {
+        return swipeDistanceRatio;
     }
 
 
@@ -203,8 +203,8 @@ public class SwipeDismissListViewTouchListener implements View.OnTouchListener {
      * 언제 사라지게 할지 판단하기 위한 이동 거리를 비율로 지정한다. 비율은 아이템뷰 가로 길이에 대한 거리를 말한다.
      * @param ratio Proportion to the length of the item view. (0 ~ 1)
      */
-    public void setDismissDecisionDistanceRate(float ratio) {
-        this.dismissDecisionDistanceRate = ratio;
+    public void setDismissDecisionDistanceRatio(float ratio) {
+        this.dismissDecisionDistanceRatio = ratio;
     }
 
     /**
@@ -213,8 +213,8 @@ public class SwipeDismissListViewTouchListener implements View.OnTouchListener {
      * 언제 사라지게 할지 판단하기 위한 이동 거리를 비율로 얻는다. 비율은 아이템뷰 가로 길이에 대한 거리를 말한다.
      * @return Proportion to the length of the item view. (0 ~ 1)
      */
-    public float getDismissDecisionDistanceRate() {
-        return dismissDecisionDistanceRate;
+    public float getDismissDecisionDistanceRatio() {
+        return dismissDecisionDistanceRatio;
     }
 
     /**
@@ -410,7 +410,7 @@ public class SwipeDismissListViewTouchListener implements View.OnTouchListener {
 
                 float viewXRatio = (mDownView.getX() / mViewWidth);
                 //Check dismissal in view of moved distance.
-                if (Math.abs(viewXRatio) > dismissDecisionDistanceRate && mSwiping) {
+                if (Math.abs(viewXRatio) > dismissDecisionDistanceRatio && mSwiping) {
                     dismiss = true;
                     dismissRight = deltaX > 0;
                 }
@@ -495,7 +495,7 @@ public class SwipeDismissListViewTouchListener implements View.OnTouchListener {
                     deltaX = Math.max(0, deltaX);
                 }
                 //limit distance
-                float swipeDistance = mViewWidth * swipeDistanceRate;
+                float swipeDistance = mViewWidth * swipeDistanceRatio;
                 if(deltaX > 0) {
                     deltaX = Math.min(swipeDistance, deltaX);
                 }
