@@ -123,6 +123,7 @@ public class SwipeDismissListViewTouchListener implements View.OnTouchListener {
     private int swipeMode = SWIPE_MODE_BOTH;
     private boolean mDoDismiss = true;
     private float swipeDistanceRate = 1;
+    private float dismissDecisionDistanceRate = 0.5f;
 
     /**
      * Determine swiping direction.<br>
@@ -161,38 +162,60 @@ public class SwipeDismissListViewTouchListener implements View.OnTouchListener {
     /**
      * Determine whether the item view will be dismissed or not when swiped<br/>
      * 밀기를 통해 리스트 아이템 뷰를 사라지게 할지 결정한다.
-     * @param mDoDismiss if false, the child view will be not dismissed
+     * @param doDismiss if false, the child view will be not dismissed
      *                   and {@link DismissCallbacks#onTryToDismiss} will be called
      *                   instead {@link DismissCallbacks#onDismiss}
      */
-    public void setDoDismiss(boolean mDoDismiss) {
-        this.mDoDismiss = mDoDismiss;
+    public void setDoDismiss(boolean doDismiss) {
+        this.mDoDismiss = doDismiss;
     }
 
     /**
-     * Set the swipe distance by setting the rate of item view's width.
-     * If the distance is less than the value of {@link android.view.ViewConfiguration#getScaledTouchSlop()},
+     * Set the movable distance in ratio to the length of the item view.
+     * If the distance is less than the value of {@link #getDismissDecisionDistanceRate()},
      * dismissing event is not called.
      * <br>
      * <br>
      * 밀기 가능한 거리를 아이템 뷰 가로 길이의 비율로 지정한다.
-     * 만약 그 거리가 {@link android.view.ViewConfiguration#getScaledTouchSlop()}의 값보다 작을 경우,
+     * 만약 그 거리가 {@link #getDismissDecisionDistanceRate()}의 값보다 작을 경우,
      * 사라지게 하는 이벤트는 작동하지 않는다.
-     * @param swipeDistanceRate 0~1. If this is 1, user can swipe the item view
-     *                          as the item view's width.
+     * @param ratio Proportion to the length of the item view. (0 ~ 1)<br>
+     *              If this is 1, user can swipe the item view as far as the item view's width.
      */
-    public void setSwipeDistanceRate(float swipeDistanceRate) {
-        this.swipeDistanceRate = swipeDistanceRate;
+    public void setSwipeDistanceRate(float ratio) {
+        this.swipeDistanceRate = ratio;
     }
 
     /**
-     * Get the swipe distance by the rate of item view's width.
-     * @return
+     * To obtain the movable distance in proportion to the length of the item view.<br>
+     *     <br>
+     *     움직일 수 있는 거리를 아이템뷰의 길이에 대한 비율로 얻는다.
+     * @return Proportion to the length of the item view. (0 ~ 1)
      */
     public float getSwipeDistanceRate() {
         return swipeDistanceRate;
     }
 
+
+    /**
+     * Set the distance to decide dismissal in proportion to the length of the item view.<br>
+     * <br>
+     * 언제 사라지게 할지 판단하기 위한 이동 거리를 비율로 지정한다. 비율은 아이템뷰 가로 길이에 대한 거리를 말한다.
+     * @param ratio Proportion to the length of the item view. (0 ~ 1)
+     */
+    public void setDismissDecisionDistanceRate(float ratio) {
+        this.dismissDecisionDistanceRate = ratio;
+    }
+
+    /**
+     * To obtain the distance to decide dismissal in portion to the length of the item view<br>
+     * <br>
+     * 언제 사라지게 할지 판단하기 위한 이동 거리를 비율로 얻는다. 비율은 아이템뷰 가로 길이에 대한 거리를 말한다.
+     * @return Proportion to the length of the item view. (0 ~ 1)
+     */
+    public float getDismissDecisionDistanceRate() {
+        return dismissDecisionDistanceRate;
+    }
 
     /**
      * The callback interface used by {@link SwipeDismissListViewTouchListener} to inform its client
@@ -384,10 +407,15 @@ public class SwipeDismissListViewTouchListener implements View.OnTouchListener {
                 float absVelocityY = Math.abs(mVelocityTracker.getYVelocity());
                 boolean dismiss = false;
                 boolean dismissRight = false;
-                if (Math.abs(deltaX) > mViewWidth / 2 && mSwiping) {
+
+                float viewXRatio = (mDownView.getX() / mViewWidth);
+                //Check dismissal in view of moved distance.
+                if (Math.abs(viewXRatio) > dismissDecisionDistanceRate && mSwiping) {
                     dismiss = true;
                     dismissRight = deltaX > 0;
-                } else if (mMinFlingVelocity <= absVelocityX && absVelocityX <= mMaxFlingVelocity
+                }
+                //Check dismissal in view of moving velocity.
+                else if (mMinFlingVelocity <= absVelocityX && absVelocityX <= mMaxFlingVelocity
                         && absVelocityY < absVelocityX
                         && mSwiping) {
                     // dismiss only if flinging in the same direction as dragging
@@ -493,7 +521,7 @@ public class SwipeDismissListViewTouchListener implements View.OnTouchListener {
                 if (mSwiping) {
                     mDownView.setTranslationX(deltaX - mSwipingSlop);
                     mDownView.setAlpha(Math.max(0f, Math.min(1f,
-                            1f - 2f * Math.abs(deltaX) / mViewWidth)));
+                            1f - Math.abs(deltaX) / mViewWidth)));
                     return true;
                 }
                 break;
